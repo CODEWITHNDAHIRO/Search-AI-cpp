@@ -1,23 +1,26 @@
-#include "../include/Map.h"
-#include <iostream>
+#ifndef MAP_H
+#define MAP_H
 
-Map::Map() {
-    // 5x5 grid setup
-    grid = {
-        {0, 0, 0, 1, 0},
-        {0, 1, 0, 1, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 1, 0},
-        {0, 0, 0, 0, 0}
-    };
-}
+#include <vector>
 
-void Map::printMap() const {
-    for (const auto& row : grid) {
-        for (int cell : row) {
-            if (cell == 1) std::cout << "# "; // Wall
-            else std::cout << ". ";          // Walkable path
-        }
-        std::cout << "\n";
-    }
-}
+struct Node {
+    int x, y;
+    int g_cost, h_cost, f_cost;
+    Node* parent;
+
+    Node(int r, int c, Node* p = nullptr) 
+        : x(r), y(c), g_cost(0), h_cost(0), f_cost(0), parent(p) {}
+};
+
+class Map {
+public:
+    std::vector<std::vector<int>> grid;
+
+    Map();
+    void printMap() const;
+    
+    // --- Day 9 Addition: A* Pathfinding Method ---
+    std::vector<std::pair<int, int>> findPath(int startX, int startY, int goalX, int goalY);
+};
+
+#endif
