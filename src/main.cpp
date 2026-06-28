@@ -3,23 +3,20 @@
 
 int main() {
     Map environment;
-    std::cout << "=== Grid Environment ===\n";
-    environment.printMap();
-
+    
     int startX = 0, startY = 0;
     int goalX = 4, goalY = 4;
 
-    std::cout << "\nFinding path from (" << startX << "," << startY << ") to (" << goalX << "," << goalY << ")...\n";
+    std::cout << "=== Finding Path via A* Algorithm ===\n";
     auto path = environment.findPath(startX, startY, goalX, goalY);
 
     if (!path.empty()) {
-        std::cout << "Path successfully found!\nWaypoints: ";
-        for (const auto& coordinate : path) {
-            std::cout << "(" << coordinate.first << "," << coordinate.second << ") ";
-        }
-        std::cout << "\n";
+        std::cout << "\nOptimal Path Found! Final Map Representation:\n";
+        std::cout << "(S = Start, G = Goal, * = Calculated Route, # = Obstacle)\n\n";
+        
+        environment.printMapWithPath(path);
     } else {
-        std::cout << "No path could be found.\n";
+        std::cout << "No valid route exists between points.\n";
     }
 
     return 0;
