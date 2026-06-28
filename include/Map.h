@@ -19,8 +19,10 @@ public:
     Map();
     void printMap() const;
     
-    
     std::vector<std::pair<int, int>> findPath(int startX, int startY, int goalX, int goalY);
+
+
+    void printMapWithPath(const std::vector<std::pair<int, int>>& path) const;
 };
 
 #endif
