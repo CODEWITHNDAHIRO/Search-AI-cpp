@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <queue> 
+
 
 Map::Map() {
     grid = {
@@ -23,6 +25,7 @@ void Map::printMap() const {
     }
 }
 
+
 int getHeuristic(int x1, int y1, int x2, int y2) {
     return std::abs(x1 - x2) + std::abs(y1 - y2);
 }
@@ -32,13 +35,16 @@ bool isValid(int x, int y, const std::vector<std::vector<int>>& grid) {
 }
 
 std::vector<std::pair<int, int>> Map::findPath(int startX, int startY, int goalX, int goalY) {
-    std::vector<Node*> open_list;
+    
+    std::priority_queue<Node*, std::vector<Node*>, CompareNodeF> open_list;
+    
     std::vector<std::vector<bool>> closed_list(grid.size(), std::vector<bool>(grid[0].size(), false));
 
     Node* start_node = new Node(startX, startY);
     start_node->h_cost = getHeuristic(startX, startY, goalX, goalY);
     start_node->f_cost = start_node->h_cost;
-    open_list.push_back(start_node);
+    
+    open_list.push(start_node);
 
     std::vector<Node*> allocated_nodes;
     allocated_nodes.push_back(start_node);
@@ -47,12 +53,10 @@ std::vector<std::pair<int, int>> Map::findPath(int startX, int startY, int goalX
     int dy[] = {0, 0, -1, 1};
 
     while (!open_list.empty()) {
-        auto current_it = std::min_element(open_list.begin(), open_list.end(), [](Node* a, Node* b) {
-            return a->f_cost < b->f_cost;
-        });
+        Node* current = open_list.top();
+        open_list.pop(); 
 
-        Node* current = *current_it;
-        open_list.erase(current_it);
+        if (closed_list[current->x][current->y]) continue;
         closed_list[current->x][current->y] = true;
 
         if (current->x == goalX && current->y == goalY) {
@@ -73,25 +77,15 @@ std::vector<std::pair<int, int>> Map::findPath(int startX, int startY, int goalX
             int newY = current->y + dy[i];
 
             if (isValid(newX, newY, grid) && !closed_list[newX][newY]) {
-                auto it = std::find_if(open_list.begin(), open_list.end(), [newX, newY](Node* n) {
-                    return n->x == newX && n->y == newY;
-                });
-
                 int new_g = current->g_cost + 1;
 
-                if (it == open_list.end()) {
-                    Node* neighbor = new Node(newX, newY, current);
-                    neighbor->g_cost = new_g;
-                    neighbor->h_cost = getHeuristic(newX, newY, goalX, goalY);
-                    neighbor->f_cost = neighbor->g_cost + neighbor->h_cost;
-                    
-                    open_list.push_back(neighbor);
-                    allocated_nodes.push_back(neighbor);
-                } else if (new_g < (*it)->g_cost) {
-                    (*it)->g_cost = new_g;
-                    (*it)->f_cost = (*it)->g_cost + (*it)->h_cost;
-                    (*it)->parent = current;
-                }
+                Node* neighbor = new Node(newX, newY, current);
+                neighbor->g_cost = new_g;
+                neighbor->h_cost = getHeuristic(newX, newY, goalX, goalY);
+                neighbor->f_cost = neighbor->g_cost + neighbor->h_cost;
+                
+                open_list.push(neighbor); 
+                allocated_nodes.push_back(neighbor);
             }
         }
     }
@@ -99,6 +93,7 @@ std::vector<std::pair<int, int>> Map::findPath(int startX, int startY, int goalX
     for (Node* n : allocated_nodes) delete n;
     return {};
 }
+
 
 void Map::printMapWithPath(const std::vector<std::pair<int, int>>& path) const {
     std::vector<std::vector<char>> display_grid(grid.size(), std::vector<char>(grid[0].size()));
