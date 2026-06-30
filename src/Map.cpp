@@ -2,15 +2,30 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <random>
+Map::Map(int rows, int cols, double obstacle_ratio) {
+    // Initializing an empty grid of the requested size
+    grid = std::vector<std::vector<int>>(rows, std::vector<int>(cols, 0));
 
-Map::Map() {
-    grid = {
-        {0, 0, 0, 1, 0},
-        {0, 1, 0, 1, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 1, 1, 0},
-        {0, 0, 0, 0, 0}
-    };
+    // Setup random number generation engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+            // Protect the top-left (0,0) and bottom-right corners so Start/Goal are always open
+            if ((r == 0 && c == 0) || (r == rows - 1 && c == cols - 1)) {
+                grid[r][c] = 0;
+                continue;
+            }
+
+            // Roll the dice: if value is less than ratio, place a wall (1)
+            if (dis(gen) < obstacle_ratio) {
+                grid[r][c] = 1;
+            }
+        }
+    }
 }
 
 void Map::printMap() const {
